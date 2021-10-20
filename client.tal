@@ -19,11 +19,12 @@ lesson in uxn
 
 %HALT { #0101 .System/debug DEO2 }
 %RTN { JMP2r }
+%READ { .Console/read DEI } ( -- character )
 %EMIT { .Console/write DEO } ( character -- )
-%EMIT-SHORT { .Console/write DEO2 } ( short -- )
 %EMIT-TERMINATE-STRING { #00 EMIT }
 %EMIT-TERMINATE-VARARGS { EMIT-TERMINATE-STRING EMIT-TERMINATE-STRING }
-%READ { .Console/read DEI } ( -- character )
+( this part of the spec should change anyway to become binary-safe )
+%EMIT-TERMINATE-BODY { EMIT-TERMINATE-STRING EMIT-TERMINATE-STRING }
 
 ( req/res byte 1, VERSION )
 %YAPV0 { #00 }
@@ -54,6 +55,8 @@ production )
 	PORT-HTTP EMIT EMIT
 	;vancouver-time-url ,print-word JSR
   EMIT-TERMINATE-STRING
+	EMIT-TERMINATE-VARARGS
+	EMIT-TERMINATE-BODY
 }
 
 |0100

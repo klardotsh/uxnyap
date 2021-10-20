@@ -1,0 +1,70 @@
+( This source code is part of the uxnyap project, released under the CC0-1.0 )
+( dedication found in the COPYING file in the root directory of this source tree, )
+( or at https://creativecommons.org/publicdomain/zero/1.0/ )
+
+( example of an HTTP(s) client over uxn file vector, depends on host-side )
+( daemon (zig example provided in this repository) )
+
+(
+please don't use this as an example of how to write uxn asm. I don't actually
+know the language very well, I just nerd-sniped myself on merveilles and since
+I've always believed in Leeroy Jenkins development (read: you can't turn down a
+dare), I decided to actually prove the concept I suggested. I'm surprised this
+even compiles, let alone works, please read the actual docs and tutorials for a
+lesson in uxn
+)
+
+|00 @System  [ &vector $2 &wst $1 &rst $1 &pad $4 &r $2 &g $2 &b $2 &debug $1 &halt $1 ]
+|10 @Console [ &vector $2 &read $1 &pad $5 &write $1 &error $1 ]
+
+%HALT { #0101 .System/debug DEO2 }
+%RTN { JMP2r }
+%EMIT { .Console/write DEO } ( character -- )
+%EMIT-SHORT { .Console/write DEO2 } ( short -- )
+%EMIT-TERMINATE-STRING { #00 EMIT }
+%EMIT-TERMINATE-VARARGS { EMIT-TERMINATE-STRING EMIT-TERMINATE-STRING }
+%READ { .Console/read DEI } ( -- character )
+
+( req/res byte 1, VERSION )
+%YAPV0 { #00 }
+
+( req/res byte 2, PROTO )
+%PROTO-MALFORMED { #00 }
+%PROTO-UDP       { #01 }
+%PROTO-TCP       { #02 }
+%PROTO-HTTP      { #03 }
+%PROTO-GEMINI    { #04 }
+
+( req byte 4+5, PORT )
+%PORT-AUTO   { #0000 } ( 0 )
+%PORT-FTP    { #1700 } ( 23 )
+%PORT-HTTP   { #5000 } ( 80 )
+%PORT-HTTPS  { #bb01 } ( 443 )
+%PORT-GEMINI { #ad07 } ( 1965 )
+
+( always using 01 as our req ID in this simple example, don't do this in
+production )
+%REQID { #01 }
+
+( this request will have no headers, so simply EMIT-TERMINATE-VARARGS is fine )
+%SEND-VANCOUVER-TIME-REQ {
+	YAPV0 EMIT
+	PROTO-HTTP EMIT
+  REQID EMIT
+	PORT-HTTP EMIT EMIT
+	;vancouver-time-url ,print-word JSR
+  EMIT-TERMINATE-STRING
+}
+
+|0100
+
+SEND-VANCOUVER-TIME-REQ
+HALT
+
+@vancouver-time-url "http://worldtimeapi.org/api/timezone/America/Vancouver.txt $1
+@print-word ( word* -- )
+	@while
+		LDAk EMIT
+		INC2 LDAk ,while JCN
+	POP2
+RTN

@@ -30,7 +30,7 @@ in the future when and if Uxn were to get a `Network` device natively.
 |    1 | VERSION |            u8 | Protocol version tag, a simple monotonic counter of breaking changes. Currently always 0 |
 |    2 |   PROTO |  enum `Proto` | |
 |    3 |      ID |            u8 | An identifier for this request, echoed back at response time. Need not be unique or monotonic, and thus could have application-defined meanings (perhaps a pointer to a context object) |
-|  4+5 |    PORT |           u16 | Target port number. Special port `0` uses the protocol-specific default if available |
+|  4+5 |    PORT |         u16be | Target port number. Special port `0` uses the protocol-specific default if available |
 |  6-x |  TARGET |          []u8 | Null-terminated UTF-8 stream denoting the target as a resolvable address (eg. IP or DNS) |
 |  x-y | VARARGS |          []u8 | Protocol-specified varargs. By convention, varargs is a 1-dimensional list, null separated. The list ends with two null bytes. Thus, the shortest VARARGS (and thus its overhead) is two bytes long. |
 |  y-z |    BODY |          []u8 | Body of the request. Also ends with a double null byte sequence. |
@@ -38,14 +38,14 @@ in the future when and if Uxn were to get a `Network` device natively.
 
 ### Response
 
-| Byte | Name    | Type | Commentary |
-|------|---------|------|------------|
-|    1 | VERSION |   u8 | Protocol version tag, a simple monotonic counter of breaking changes. Currently always 0 |
-|    2 |   PROTO |   u8 | See `Enums::Proto` below |
-|    3 |      ID |   u8 | The ID from the request that triggered this response |
-|  4+5 |  STATUS |  u16 | Protocol-specific response status, if applicable (otherwise, both bytes are null). For example, HTTP status codes go here. Special values `65000` and above represent an internal error in processing the request (perhaps a malformed sequence, missing port number, etc), which are not yet enumerated in this example |
-|  6-x | VARARGS | []u8 | Protocol-specified varargs. By convention, varargs is a 1-dimensional list, null separated. The list ends with two null bytes. Thus, the shortest VARARGS (and thus its overhead) is two bytes long. |
-|  x-y |    BODY | []u8 | Body of the response. If the protocol is encrypted or secured, this will have been stripped by this point. Also ends with a double null byte sequence. |
+| Byte | Name    |  Type | Commentary |
+|------|---------|-------|------------|
+|    1 | VERSION |    u8 | Protocol version tag, a simple monotonic counter of breaking changes. Currently always 0 |
+|    2 |   PROTO |    u8 | See `Enums::Proto` below |
+|    3 |      ID |    u8 | The ID from the request that triggered this response |
+|  4+5 |  STATUS | u16be | Protocol-specific response status, if applicable (otherwise, both bytes are null). For example, HTTP status codes go here. Special values `65000` and above represent an internal error in processing the request (perhaps a malformed sequence, missing port number, etc), which are not yet enumerated in this example |
+|  6-x | VARARGS |  []u8 | Protocol-specified varargs. By convention, varargs is a 1-dimensional list, null separated. The list ends with two null bytes. Thus, the shortest VARARGS (and thus its overhead) is two bytes long. |
+|  x-y |    BODY |  []u8 | Body of the response. If the protocol is encrypted or secured, this will have been stripped by this point. Also ends with a double null byte sequence. |
 
 ### Enums
 

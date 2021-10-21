@@ -21,22 +21,23 @@ lesson in uxn
 %RTN { JMP2r }
 %READ { .Console/read DEI } ( -- character )
 %EMIT { .Console/write DEO } ( character -- )
+%EMIT2 { EMIT EMIT }
 %EMIT-TERMINATE-STRING { #00 EMIT }
 %EMIT-TERMINATE-VARARGS { EMIT-TERMINATE-STRING EMIT-TERMINATE-STRING }
 ( this part of the spec should change anyway to become binary-safe )
 %EMIT-TERMINATE-BODY { EMIT-TERMINATE-STRING EMIT-TERMINATE-STRING }
 
-( req/res byte 1, VERSION )
-%YAPV0 { #00 }
+( req/res byte 1+2, VERSION )
+%YAPV0 { #0000 }
 
-( req/res byte 2, PROTO )
+( req/res byte 3, PROTO )
 %PROTO-MALFORMED { #00 }
 %PROTO-UDP       { #01 }
 %PROTO-TCP       { #02 }
 %PROTO-HTTP      { #03 }
 %PROTO-GEMINI    { #04 }
 
-( req byte 4+5, PORT )
+( req byte 5+6, PORT )
 %PORT-AUTO   { #0000 } ( 0 )
 %PORT-FTP    { #1700 } ( 23 )
 %PORT-HTTP   { #5000 } ( 80 )
@@ -49,10 +50,10 @@ production )
 
 ( this request will have no headers, so simply EMIT-TERMINATE-VARARGS is fine )
 %SEND-VANCOUVER-TIME-REQ {
-	YAPV0 EMIT
+	YAPV0 EMIT2
 	PROTO-HTTP EMIT
   REQID EMIT
-	PORT-HTTP EMIT EMIT
+	PORT-HTTP EMIT2
 	;vancouver-time-url ,print-word JSR
   EMIT-TERMINATE-STRING
 	EMIT-TERMINATE-VARARGS

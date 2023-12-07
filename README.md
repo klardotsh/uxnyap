@@ -1,3 +1,17 @@
+**WARNING: THIS PROJECT IS ABANDONED.**
+
+It's retained here for documentation purposes, but please don't attempt to
+actually use this. The protocol needs serious work (eg. a better data structure
+for fixed-length transmissions such that a double-null sequence isn't required
+    to end the stream), and I almost guarantee none of this runs on modern
+    Uxn/Varvara implementations. Use this as inspiration, fork it, whatever,
+    but it doesn't do anything useful of its own, and I haven't really had the
+    time to dig back into the Uxn ecosystem.
+
+- klardotsh, Dec 2023
+
+---
+
 # uxnyap
 
 > a hack so bad I felt the need to write a protocol definition for it
